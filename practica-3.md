@@ -1,5 +1,8 @@
 # Práctica 3: Validación y Pruebas en Sistema IoT con IA (Entregable Completo)
 
+**Nombre del Estudiante:** Salvador Rodriguez Ceballos
+**Repo:** https://github.com/chavarc97/practica-3
+
 Este documento engloba todos los requerimientos de la práctica de laboratorio, validando un ecosistema IoT simulado, introduciendo inteligencia artificial para detección de anomalías y detallando el plan exhaustivo de pruebas.
 
 ## 1. Alcance del Sistema IoT (Simulado)
@@ -88,28 +91,75 @@ A continuación, se listan los 30 casos de prueba diseñados para cubrir todos l
 - **IA/ML:** `scikit-learn` para *Isolation Forest* y `matplotlib` para reportes visuales.
 
 ## 8. Resultados de Pruebas Automatizadas y Métricas Clave
-Se ejecutaron los scripts automatizados (ver `src/automation`):
-- **Cobertura de automatización:** Múltiples pruebas pasando 100% con éxito. Se verifica esquema completo.
-- **Latencia:** Inferencia del modelo de IA estimada en **<50ms** por registro.
-- **Métricas de la IA (Resultados tras ejecución):**
-  - **Verdaderos Positivos (Anomalías correctas):** `138`
-  - **Falsos Positivos (Falsas alarmas):** `12`
-  - **Precision:** `0.9200`
-  - **Recall (TPR):** `1.0000`
-  - **F1-Score:** `0.9583`
+
+### 8.1 Ejecución de Pruebas Automatizadas
+Se ejecutaron los 8 tests automatizados con `pytest` (ver `src/automation/`). Todos pasaron exitosamente:
+
+```
+platform darwin -- Python 3.13.3, pytest-9.0.3
+collected 8 items
+
+automation/test_mqtt_mock.py::test_mqtt_connection_success        PASSED [ 12%]
+automation/test_mqtt_mock.py::test_mqtt_publish_telemetry         PASSED [ 25%]
+automation/test_mqtt_mock.py::test_mqtt_reject_malformed_payload  PASSED [ 37%]
+automation/test_mqtt_mock.py::test_mqtt_accept_valid_payload      PASSED [ 50%]
+automation/test_telemetry.py::test_data_format                    PASSED [ 62%]
+automation/test_telemetry.py::test_no_missing_values              PASSED [ 75%]
+automation/test_telemetry.py::test_anomalies_present              PASSED [ 87%]
+automation/test_telemetry.py::test_sensor_bounds                  PASSED [100%]
+
+8 passed in 0.48s
+```
+
+- **Cobertura de automatización:** 8 de 30 casos = **26.7%** (priorizando casos críticos de telemetría y seguridad MQTT). El reporte completo se encuentra en `src/evidencias/pytest_report.html`.
+
+### 8.2 Métricas de la IA (Isolation Forest — resultados reales)
+
+| Métrica | Valor |
+|---|---|
+| Total de registros analizados | 5,000 |
+| Verdaderos Positivos (TP) | 138 |
+| Falsos Positivos (FP) | 12 |
+| Falsos Negativos (FN) | 0 |
+| Verdaderos Negativos (TN) | 4,850 |
+| **Precision** | **0.9200** |
+| **Recall / TPR** | **1.0000** |
+| **F1-Score** | **0.9583** |
+| **FPR (False Positive Rate)** | **0.0025** |
+
+### 8.3 MTTD y MTTR (métricas operacionales)
+
+| Métrica | Valor | Descripción |
+|---|---|---|
+| **MTTD** (Mean Time To Detect) | **23.55 ms / lote** | Tiempo de inferencia del Isolation Forest sobre el batch completo (5,000 registros). Equivale a < 0.005 ms por registro individual. |
+| **MTTR** (Mean Time To Resolve) | **10.3 minutos** (promedio) | Duración promedio de las rachas de lecturas anómalas por dispositivo hasta volver a estado normal. Mediana: 10 min. Máximo: 20 min. |
+| Rachas de anomalía detectadas | 145 | Grupos de lecturas consecutivas flaggeadas por dispositivo |
+| Latencia end-to-end (p95 estimado) | < 50 ms | Inferencia + overhead de pipeline |
 
 ## 9. Evidencias Visuales y Entregables en Código
 El proyecto cuenta con el código fuente y las capturas organizadas en carpetas:
 - `src/data/generate_data.py`: Genera `sensor_telemetry.csv` (simulador IoT).
 - `src/ai_models/anomaly_detector.py`: Entrena la IA, guarda `isolation_forest.pkl`.
-- `src/ai_models/anomalies_plot.png`: Evidencia visual de la segmentación de anomalías realizada por el modelo de IA.
+- `src/metrics/mttd_mttr_report.py`: Calcula MTTD, MTTR, FPR y cobertura. Genera `anomaly_timeline.png`.
+- `src/metrics/confusion_matrix_plot.py`: Genera la matriz de confusión del modelo.
+- `src/automation/`: Casos automatizados en pytest (`test_telemetry.py`, `test_mqtt_mock.py`).
+- `src/evidencias/`: Todas las evidencias generadas automáticamente.
 
-**Visualización del Modelo de Inteligencia Artificial (Isolation Forest)**
-
+### Evidencia 1 — Detección de Anomalías (Scatter plot Temperatura vs Humedad)
 ![Gráfico de Detección de Anomalías](./src/ai_models/anomalies_plot.png)
 *(El modelo separa correctamente los datos operacionales normales de las caídas de humedad, lecturas térmicas extremas o fallos de sensor)*
 
-- `src/automation/`: Casos automatizados en pytest para telemetría (`test_telemetry.py`) y simulaciones de MQTT (`test_mqtt_mock.py`).
+### Evidencia 2 — Línea de Tiempo de Anomalías por Dispositivo
+![Línea de Tiempo de Anomalías](./src/evidencias/anomaly_timeline.png)
+*(Temperatura cronológica de los 5 dispositivos ESP32 durante 7 días. Puntos rojos = anomalías detectadas por IA. Línea naranja = umbral 40°C)*
+
+### Evidencia 3 — Matriz de Confusión del Modelo
+![Matriz de Confusión](./src/evidencias/confusion_matrix.png)
+*(TP=138, FP=12, FN=0, TN=4850. El modelo no generó ningún falso negativo — recall perfecto del 100%)*
+
+### Evidencia 4 — Reporte de Ejecución de Pruebas Automatizadas
+Reporte HTML completo disponible en `src/evidencias/pytest_report.html` (generado con `pytest-html`).
+Output de texto disponible en `src/evidencias/pytest_output.txt`.
 
 ## 10. Checklist de Entrega
 - [x] Plan de Pruebas completo.

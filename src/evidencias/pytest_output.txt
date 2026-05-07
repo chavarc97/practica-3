@@ -1,0 +1,18 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.3, pytest-9.0.3, pluggy-1.6.0 -- /Users/chava/Documents/ING-SOFTWARE/6°/Calidad de Software/practica-3/src/venv/bin/python3.13
+cachedir: .pytest_cache
+metadata: {'Python': '3.13.3', 'Platform': 'macOS-26.3-arm64-arm-64bit-Mach-O', 'Packages': {'pytest': '9.0.3', 'pluggy': '1.6.0'}, 'Plugins': {'metadata': '3.1.1', 'html': '4.2.0'}, 'JAVA_HOME': '/Library/Java/JavaVirtualMachines/jdk-22.jdk/Contents/Home'}
+rootdir: /Users/chava/Documents/ING-SOFTWARE/6°/Calidad de Software/practica-3/src
+plugins: metadata-3.1.1, html-4.2.0
+collecting ... collected 8 items
+
+automation/test_mqtt_mock.py::test_mqtt_connection_success PASSED        [ 12%]
+automation/test_mqtt_mock.py::test_mqtt_publish_telemetry PASSED         [ 25%]
+automation/test_mqtt_mock.py::test_mqtt_reject_malformed_payload PASSED  [ 37%]
+automation/test_mqtt_mock.py::test_mqtt_accept_valid_payload PASSED      [ 50%]
+automation/test_telemetry.py::test_data_format PASSED                    [ 62%]
+automation/test_telemetry.py::test_no_missing_values PASSED              [ 75%]
+automation/test_telemetry.py::test_anomalies_present PASSED              [ 87%]
+automation/test_telemetry.py::test_sensor_bounds PASSED                  [100%]
+
+============================== 8 passed in 0.48s ===============================
